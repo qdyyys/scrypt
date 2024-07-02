@@ -4,7 +4,7 @@ const LightIco: React.FC<LightIcoProps> = ({ lightTheme, setLightTheme }) => {
   return (
     <div
       className="z-10 cursor-pointer p-[7px] transition"
-      onClick={() => setLightTheme(true)}
+      onClick={() => (setLightTheme ? setLightTheme(true) : null)}
     >
       <svg
         width="16"

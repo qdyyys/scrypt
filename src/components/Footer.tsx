@@ -2,7 +2,7 @@ import Logo from "./Logo";
 import { IoOpenOutline } from "react-icons/io5";
 import { ThemeProps } from "../types";
 
-const Footer: React.FC<ThemeProps> = ({ lightTheme, setLightTheme }) => {
+const Footer: React.FC<ThemeProps> = ({ lightTheme }) => {
   return (
     <footer className="max-w-[840px] mx-auto">
       <div
