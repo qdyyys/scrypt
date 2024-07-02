@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "SFProRegular";
+  src: url(../public/fonts/SFProDisplay-Regular.ttf);
+  src: url(../public/fonts/SFProDisplay-Regular.woff);
+  src: url(../public/fonts/SFProDisplay-Regular.woff2);
+}
+@font-face {
+  font-family: "SFProMedium";
+  src: url(../public/fonts/SFProDisplay-Medium.ttf);
+  src: url(../public/fonts/SFProDisplay-Medium.woff);
+  src: url(../public/fonts/SFProDisplay-Medium.woff2);
+}
+@font-face {
+  font-family: "SFProSemiBold";
+  src: url(../public/fonts/SFProDisplay-Semibold.ttf);
+  src: url(../public/fonts/SFProDisplay-Semibold.woff);
+  src: url(../public/fonts/SFProDisplay-Semibold.woff2);
+}
+@font-face {
+  font-family: "TTFirsNeueDemiBold";
+  src: url(../public/fonts/TTFirsNeue-DemiBold.ttf);
+  src: url(../public/fonts/TTFirsNeue-DemiBold.woff);
+  src: url(../public/fonts/TTFirsNeue-DemiBold.woff2);
+}
+.loader {
+  animation: loader 1s infinite;
+}
+@keyframes loader {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
