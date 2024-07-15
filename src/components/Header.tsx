@@ -10,7 +10,7 @@ const Header: React.FC<ThemeProps> = ({ lightTheme, setLightTheme }) => {
   const [showBurger, setShowBurger] = useState(false);
 
   return (
-    <header className="font-SFProRegular max-w-[940px] w-[940px] mx-auto flex justify-between py-[26px] items-center">
+    <header className="font-SFProRegular max-w-[940px] w-full mx-auto flex justify-between py-[26px] items-center relative">
       <div className="font-SFProRegular max-w-[940px] w-[940px] mx-auto flex justify-between py-[26px] items-center main_menu">
         <Link to="/">
           <div
@@ -112,11 +112,11 @@ const Header: React.FC<ThemeProps> = ({ lightTheme, setLightTheme }) => {
             onClick={() => setShowBurger(!showBurger)}
           />
           <div
-            className={`pl-10 pr-5 rounded-xl py-5 h-[300px] flex flex-col justify-end relative -top-[70px] transition ${
+            className={`pl-10 pr-5 rounded-xl py-5 h-[300px] flex flex-col justify-end relative -top-[70px] transition  ${
               lightTheme
                 ? "bg-white text-black shadow-lightShadowBlock"
                 : "bg-darkBg text-white shadow-darkSHadowBlock"
-            } ${showBurger ? "trnslate-x-0" : "translate-x-[200px]"}`}
+            } ${showBurger ? "translate-x-0" : "translate-x-[200px]"}`}
           >
             <div className="flex flex-col gap-5">
               <nav>

@@ -17,9 +17,11 @@
 }
 body {
   background-color: transparent;
+  overflow-x: hidden;
 }
 body,
 html {
+  overflow-x: hidden;
   overflow-x: hidden;
 }
 @font-face {
