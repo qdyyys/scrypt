@@ -199,6 +199,9 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
         const data = await getExchangeStatus(exchangeData.id as number);
         setStatus(data.status);
         console.log(status);
+        if (data.status === "asdasd") {
+          clearInterval(checkStatus);
+        }
       }, 2000);
     }
   }, [exchangeData]);
