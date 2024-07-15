@@ -52,3 +52,11 @@ export const createExchange = async (
     );
   }
 };
+
+export const getExchangeStatus = async (id: number) => {
+  const response = await fetch(
+    `https://api.changenow.io/v1/transactions/${id}/${apiKey}`
+  );
+  const status = await response.json();
+  return status;
+};

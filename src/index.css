@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+::-webkit-scrollbar {
+  width: 10px;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 50px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(114, 96, 230, 1);
+  border-radius: 50px;
+}
+body {
+  background-color: transparent;
+}
+body,
+html {
+  overflow-x: hidden;
+}
 @font-face {
   font-family: "SFProRegular";
   src: url(../public/fonts/SFProDisplay-Regular.ttf);
@@ -35,5 +55,14 @@
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1000px) {
+  .menu {
+    display: flex;
+  }
+  .main_menu {
+    display: none;
   }
 }

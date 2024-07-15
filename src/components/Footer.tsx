@@ -4,7 +4,7 @@ import { ThemeProps } from "../types";
 
 const Footer: React.FC<ThemeProps> = ({ lightTheme }) => {
   return (
-    <footer className="max-w-[840px] mx-auto">
+    <footer className="max-w-[840px] w-[840px] shrink-0 mx-auto bottom-0 ">
       <div
         className={`pb-[48px] flex items-center justify-between ${
           lightTheme ? "text-[#100F1B99]" : "text-[#ECEAFF99]"

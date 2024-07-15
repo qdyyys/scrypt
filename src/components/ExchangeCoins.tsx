@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { getCoinsData, checkAmount, createExchange } from "../../changeNow";
+import {
+  getCoinsData,
+  checkAmount,
+  createExchange,
+  getExchangeStatus,
+} from "../../changeNow";
 import { IoIosArrowDown } from "react-icons/io";
 import { ThemeProps } from "../types";
 import ChangeIco from "./ChangeIco";
@@ -9,13 +14,23 @@ import { TbArrowsExchange2 } from "react-icons/tb";
 import { GoCheck } from "react-icons/go";
 import { IoLogoUsd } from "react-icons/io5";
 import { GiCardExchange } from "react-icons/gi";
-import Footer from "./Footer";
+import { FiCopy } from "react-icons/fi";
+import { IoMdClose } from "react-icons/io";
 
 interface Coin {
   ticker: string;
   image: string;
 }
-
+interface DataTrade {
+  payinAddress?: string;
+  payoutAddress?: string;
+  fromCurrency?: string;
+  toCurrency?: string;
+  id?: number;
+  amount?: number;
+  directedAmount?: number;
+  status?: string;
+}
 const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
   const [coins, setCoins] = useState<Coin[]>([]);
   const [visibSend, setVisibSend] = useState(false);
@@ -32,6 +47,9 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
   const [receiveLoad, setReceiveLoad] = useState(false);
   const [userAddress, setUserAddress] = useState("");
   const [userAddressWarn, setUserAddressWarn] = useState(false);
+  const [exchangeData, setExchangeCoinsData] = useState<DataTrade>({});
+  const [modalExchange, setModalExchange] = useState(false);
+  const [status, setStatus] = useState<string | null>("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -153,10 +171,10 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
       );
       if (data.error === "not_valid_address") {
         setUserAddressWarn(true);
-        console.log(data, "123");
-      } else {
+      } else if (!data.error) {
         setUserAddressWarn(false);
-        console.log(data, "fewf");
+        setExchangeCoinsData(data);
+        setModalExchange(true);
       }
     }
   };
@@ -164,9 +182,30 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
     setVisibReceive(false);
     setVisibSend(false);
   };
+  const reverseCoins = async () => {
+    const tempTicker = receive;
+    const tempImage = receiveIco;
+    setReceive(send);
+    setReceiveIco(sendIco);
+    setSend(tempTicker);
+    setSendIco(tempImage);
+  };
+  const handleFinalizeExchange = () => {
+    setExchangeCoinsData({});
+  };
+  useEffect(() => {
+    if (exchangeData.id as number) {
+      const checkStatus = setInterval(async () => {
+        const data = await getExchangeStatus(exchangeData.id as number);
+        setStatus(data.status);
+        console.log(status);
+      }, 2000);
+    }
+  }, [exchangeData]);
+
   return (
     <>
-      <div className="max-w-[940px] mx-auto font-SFProRegular">
+      <div className="max-w-[940px] mx-auto font-SFProRegular flex-1 overflow-x-hidden">
         <h2
           className={`mb-[20px] ml-3 text-[14px] ${
             lightTheme ? "text-textGray" : "text-[#ECEAFF73]"
@@ -177,11 +216,11 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
 
         <div className="flex w-full gap-[12px] mb-[30px]">
           <div
-            className={`border w-full rounded-[12px] p-[20px] gap-[8px] flex flex-col transition ${
+            className={`border w-full rounded-[12px] p-[20px] gap-[8px] flex flex-col ${
               lightTheme ? "bg-blockGray" : "bg-blockDark"
             } ${sendWarn ? "border-rose-300" : "border-transparent"}`}
           >
-            <div className="relative ">
+            <div className="relative">
               <div
                 className="flex items-center gap-[10px] cursor-pointer"
                 onClick={handleVisibSend}
@@ -194,7 +233,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
                   )}
                 </div>
                 <p
-                  className={`transition uppercase ${
+                  className={`uppercase ${
                     lightTheme ? "text-black" : "text-white"
                   }`}
                 >
@@ -208,7 +247,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
               </div>
 
               <ul
-                className={`absolute max-h-[160px] overflow-scroll p-[4px] rounded-[12px] top-8 -left-1 transition  ${
+                className={`absolute max-h-[160px] overflow-scroll p-[4px] rounded-[12px] top-8 -left-1 ${
                   visibSend ? "opacity-1 visible" : "opacity-0 invisible"
                 } ${
                   lightTheme
@@ -224,7 +263,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
                           onClick={() =>
                             handleSelectSend(item.ticker, item.image)
                           }
-                          className={`flex p-[8px] justify-between rounded-[8px] cursor-pointer transition ${
+                          className={`flex p-[8px] justify-between rounded-[8px] cursor-pointer ${
                             lightTheme
                               ? "hover:bg-itemCoinHov "
                               : "hover:bg-blockDark"
@@ -277,7 +316,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
           </div>
 
           <div
-            className={`border w-full rounded-[12px] p-[20px] gap-[8px] flex flex-col transition ${
+            className={`border w-full rounded-[12px] p-[20px] gap-[8px] flex flex-col ${
               lightTheme ? "bg-blockGray" : "bg-blockDark"
             } ${receiveWarn ? "border-rose-300" : "border-transparent"}`}
           >
@@ -294,7 +333,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
                   )}
                 </div>
                 <p
-                  className={`transition uppercase ${
+                  className={`uppercase ${
                     lightTheme ? "text-black" : "text-white"
                   }`}
                 >
@@ -308,7 +347,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
               </div>
 
               <ul
-                className={`absolute max-h-[160px] overflow-scroll p-[4px] rounded-[12px] top-8 -left-1 transition  ${
+                className={`absolute max-h-[160px] overflow-scroll p-[4px] rounded-[12px] top-8 -left-1 ${
                   visibReceive ? "opacity-1 visible" : "opacity-0 invisible"
                 } ${
                   lightTheme
@@ -324,7 +363,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
                           onClick={() =>
                             handleSelectReceive(item.ticker, item.image)
                           }
-                          className={`flex p-[8px] justify-between rounded-[8px] cursor-pointer transition ${
+                          className={`flex p-[8px] justify-between rounded-[8px] cursor-pointerb ${
                             lightTheme
                               ? "hover:bg-itemCoinHov "
                               : "hover:bg-blockDark"
@@ -392,7 +431,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
                 placeholder={`Ваш ${receive} адресс`}
                 onChange={(e) => setUserAddress(e.target.value)}
                 value={userAddress}
-                className={`transition outline-none rounded-[10px] p-[12px] ${
+                className={`outline-none rounded-[10px] p-[12px] ${
                   lightTheme
                     ? "placeholder:text-textGray bg-blockGray"
                     : "placeholder:text-[#eceaff40] text-white bg-blockDark"
@@ -403,7 +442,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
               <input
                 type="text"
                 placeholder="Telegram (Необязательно)"
-                className={`transition outline-none rounded-[10px] p-[12px] ${
+                className={`outline-none rounded-[10px] p-[12px] ${
                   lightTheme
                     ? "placeholder:text-textGray bg-blockGray"
                     : "placeholder:text-[#eceaff40] text-white bg-blockDark"
@@ -412,20 +451,35 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
             </div>
 
             <div className="w-1/2 flex flex-col gap-[12px]">
-              <div
-                className={`text-center text-[14px] p-[12px] rounded-[10px] flex items-center justify-center gap-[10px] cursor-pointer bg-purple text-white`}
-                onClick={handleCreateExchange}
-              >
-                <RiExchangeDollarFill className="text-[20px]" />
-                <p>Создать обмен</p>
-              </div>
+              {Object.keys(exchangeData).length > 0 ? (
+                <div
+                  className={`text-center text-[14px] p-[12px] rounded-[10px] flex items-center justify-center gap-[10px] cursor-pointer text-white transition active:scale-[0.98] select-none ${
+                    lightTheme
+                      ? "bg-darkGray hover:bg-darkGray/50"
+                      : "bg-lightGray/30 hover:bg-lightGray/40"
+                  }`}
+                  onClick={() => setModalExchange(true)}
+                >
+                  <RiExchangeDollarFill className="text-[20px] z-10 relative" />
+                  <p className="z-10">Активный обмен</p>
+                </div>
+              ) : (
+                <div
+                  className={`text-center text-[14px] p-[12px] rounded-[10px] flex items-center justify-center gap-[10px] cursor-pointer bg-purple text-white hover:bg-[#8674F5] transition active:scale-[0.98] select-none`}
+                  onClick={handleCreateExchange}
+                >
+                  <RiExchangeDollarFill className="text-[20px] z-10 relative" />
+                  <p className="z-10">Создать обмен</p>
+                </div>
+              )}
 
               <div
-                className={`border text-center text-[14px] p-[12px] rounded-[10px] flex items-center justify-center gap-[10px] cursor-pointer ${
+                className={`border text-center text-[14px] p-[12px] rounded-[10px] flex items-center justify-center gap-[10px] cursor-pointer active:scale-[0.98] transition select-none ${
                   lightTheme
                     ? "border-[#100f1b1a] text-black"
                     : "border-[#eceaff1a] text-white"
                 }`}
+                onClick={reverseCoins}
               >
                 <TbArrowsExchange2 className="text-[20px]" />
                 <p>Отзеркалить</p>
@@ -445,7 +499,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
 
           <div className="grid grid-cols-3 gap-[12px]">
             <div
-              className={`transition border ${
+              className={`border ${
                 lightTheme
                   ? "bg-white border-[#100f1b1a]"
                   : "bg-blockDark border-[#ECEAFF1A]"
@@ -467,7 +521,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
             </div>
 
             <div
-              className={`transition border ${
+              className={`border ${
                 lightTheme
                   ? "bg-white border-[#100f1b1a]"
                   : "bg-blockDark border-[#ECEAFF1A]"
@@ -489,7 +543,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
             </div>
 
             <div
-              className={`transition border ${
+              className={`border ${
                 lightTheme
                   ? "bg-white border-[#100f1b1a]"
                   : "bg-blockDark border-[#ECEAFF1A]"
@@ -536,7 +590,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
               <img
                 src="https://images.ctfassets.net/q5ulk4bp65r7/lUIdMeDm9tf33LZNjPqz8/a44f28b20bd9846efc62cf5a230d875a/Learn_Illustration_Ultimate_Guide_Bitcoin.webp?w=768&fm=png"
                 alt=""
-                className="rounded-[8px] mb-[8px] brightness-75 hover:brightness-100 transition"
+                className="rounded-[8px] mb-[8px] brightness-75 hover:brightness-100"
               />
               <div>
                 <h2 className={`${lightTheme ? "text-black" : "text-white"}`}>
@@ -566,7 +620,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
               <img
                 src="https://etherplan.com/wp-content/uploads/2020/11/The-purpose-of-cryptocurrencies-is-trust-minimization.-1.png"
                 alt=""
-                className="rounded-[8px] mb-[8px] brightness-75 hover:brightness-100 transition"
+                className="rounded-[8px] mb-[8px] brightness-75 hover:brightness-100"
               />
               <div>
                 <h2 className={`${lightTheme ? "text-black" : "text-white"}`}>
@@ -590,7 +644,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
               <img
                 src="https://images.ctfassets.net/q5ulk4bp65r7/3thWklmvu2WmAHJh0k1AcC/51521feeef170d94a446fbec6f262912/what-is-ethereum.png?w=768&fm=png"
                 alt=""
-                className="rounded-[8px] mb-[8px] brightness-75 hover:brightness-100 transition"
+                className="rounded-[8px] mb-[8px] brightness-75 hover:brightness-100"
                 onClick={() =>
                   window.open(
                     "https://www.coinbase.com/ru/learn/crypto-basics/what-is-ethereum",
@@ -626,7 +680,7 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
               <img
                 src="https://images.ctfassets.net/q5ulk4bp65r7/5FbQ4oiMCnZMZZ1udW3jYZ/fd738c69fc6508d3286163661713f684/Learn_Illustration_What_is_a_Crypto_Wallet.png?w=768&fm=png"
                 alt=""
-                className="rounded-[8px] mb-[8px] brightness-75 hover:brightness-100 transition"
+                className="rounded-[8px] mb-[8px] brightness-75 hover:brightness-100"
               />
               <div>
                 <h2
@@ -646,9 +700,112 @@ const ExchangeCoins: React.FC<ThemeProps> = ({ lightTheme }) => {
               </div>
             </article>
           </div>
-
-          <Footer lightTheme={lightTheme} />
         </div>
+
+        {
+          <div
+            className={`transition z-10 p-8 rounded-[20px] fixed top-28 left-1/2 -translate-x-1/2 ${
+              lightTheme
+                ? "text-black bg-blockGray shadow-darkSHadowBlock"
+                : "text-white bg-blockDark shadow-lightShadowBlock"
+            } ${
+              Object.keys(exchangeData).length > 0 && modalExchange
+                ? "scale-1"
+                : "scale-0"
+            }`}
+          >
+            <span className="flex justify-between mb-11">
+              <p>Детали обмена</p>
+              <p>#{exchangeData.id}</p>
+            </span>
+
+            <ul className="mb-12">
+              <li className="mb-2 flex items-center justify-between">
+                <div>
+                  Внесите {exchangeData.directedAmount}{" "}
+                  <span className="uppercase">{exchangeData.fromCurrency}</span>
+                </div>
+                <span>
+                  {status === "new" || status === "waiting" || status === "" ? (
+                    <TbLoader2
+                      className={`loader ${
+                        lightTheme ? "text-black" : "text-white"
+                      }`}
+                    />
+                  ) : (
+                    <GoCheck />
+                  )}
+                </span>
+              </li>
+              <li>
+                По адрессу
+                <span className="flex text-nowrap items-center justify-between">
+                  {exchangeData.payinAddress} <FiCopy />
+                </span>
+              </li>
+            </ul>
+
+            <ul>
+              <li className="mb-2">
+                {status !== "waiting" && status !== "new" && status !== "" ? (
+                  <span className="flex items-center justify-between">
+                    Отправка средств {exchangeData.amount}{" "}
+                    {status !== "" &&
+                    status !== "new" &&
+                    status !== "waiting" &&
+                    status !== "confirming" &&
+                    status !== "exchanging" &&
+                    status !== "sending" ? (
+                      <TbLoader2
+                        className={`loader ${
+                          lightTheme ? "text-black" : "text-white"
+                        }`}
+                      />
+                    ) : (
+                      <GoCheck />
+                    )}
+                  </span>
+                ) : null}
+                <span className="uppercase">
+                  {exchangeData.amount} {exchangeData.toCurrency}
+                </span>
+              </li>
+              <li>По вашему адрессу {exchangeData.payoutAddress}</li>
+            </ul>
+
+            <span
+              className="absolute top-3 right-3 cursor-pointer"
+              onClick={() => setModalExchange(false)}
+            >
+              <IoMdClose />
+            </span>
+
+            <div className="flex gap-3 mt-3">
+              <span
+                className={`h-2 w-full rounded ${
+                  lightTheme ? "bg-[#100f1b40]" : "bg-lightGray"
+                }`}
+              ></span>
+              <span
+                className={`h-2 w-full rounded ${
+                  lightTheme ? "bg-[#100f1b40]" : "bg-lightGray"
+                }`}
+              ></span>
+              <span
+                className={`h-2 w-full rounded ${
+                  lightTheme ? "bg-[#100f1b40]" : "bg-lightGray"
+                }`}
+              ></span>
+            </div>
+
+            <div
+              className={`bg-rose-500 text-white mt-5 rounded-[14px] text-center w-max mx-auto px-4 py-1 cursor-pointer active:scale-95 transition`}
+              onClick={handleFinalizeExchange}
+            >
+              Завершить обмен
+            </div>
+          </div>
+        }
       </div>
     </>
   );
